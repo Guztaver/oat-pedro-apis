@@ -56,8 +56,9 @@ npm start
 ```
 
 4. **Acesse a API:**
-- Servidor local: `http://localhost:3000`
-- Documentação: `http://localhost:3000/`
+- **GitHub Pages (Online):** `https://guztaver.github.io/oat-pedro-apis/`
+- **Servidor local:** `http://localhost:3000`
+- **Documentação:** `http://localhost:3000/`
 
 ## 🤖 **IMPORTAÇÃO AUTOMÁTICA NO POSTMAN** 
 
@@ -322,6 +323,21 @@ Os dados são armazenados em um **Array em memória**, conforme especificado no 
 - `404` - Not Found (Item não encontrado)
 - `500` - Internal Server Error (Erro do servidor)
 
+## 🌐 Deploy e Acesso
+
+### **🚀 GitHub Pages (ONLINE)**
+- **URL:** https://guztaver.github.io/oat-pedro-apis/
+- **Status:** ✅ Automaticamente atualizado a cada commit
+- **Recursos:** Documentação completa, downloads, exemplos
+
+### **💻 Servidor Local (DESENVOLVIMENTO)**
+- **URL:** http://localhost:3000
+- **Swagger:** http://localhost:3000/api-docs
+- **Para desenvolvedores:** Execute `npm run dev`
+
+### **📤 Para o Professor Pedro:**
+**Link para Entrega:** https://guztaver.github.io/oat-pedro-apis/
+
 ## 👨‍💻 Autor
 
 - **Nome:** Gustavo
@@ -329,6 +345,7 @@ Os dados são armazenados em um **Array em memória**, conforme especificado no 
 - **Disciplina:** Desenvolvimento de APIs
 - **Professor:** Pedro Borges
 - **Projeto:** OAT1 - CRUD com Arrays
+- **GitHub:** https://github.com/Guztaver/oat-pedro-apis
 
 ## 📝 Licença
 
