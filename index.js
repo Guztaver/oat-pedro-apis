@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const { swaggerUi, specs } = require('./swagger');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,8 +15,15 @@ app.use((req, _res, next) => {
   next();
 });
 
+// Swagger Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+  explorer: true,
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: "API CRUD - OAT1 Pedro Borges"
+}));
+
 // Array para armazenar os dados (substituindo um banco de dados)
-let items = [];
+const items = [];
 let nextId = 1;
 
 // Função para gerar próximo ID
@@ -44,13 +52,40 @@ const validateId = (req, res, next) => {
   next();
 };
 
-// Rota raiz - informações sobre a API
+/**
+ * @swagger
+ * /:
+ *   get:
+ *     summary: Informações da API
+ *     description: Retorna informações gerais sobre a API e lista de endpoints disponíveis
+ *     tags: [Info]
+ *     responses:
+ *       200:
+ *         description: Informações da API retornadas com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "API CRUD com Arrays - OAT1 Pedro Borges"
+ *                 version:
+ *                   type: string
+ *                   example: "1.0.0"
+ *                 endpoints:
+ *                   type: object
+ *                 totalItems:
+ *                   type: integer
+ *                   example: 0
+ */
 app.get('/', (_req, res) => {
   res.json({
     message: 'API CRUD com Arrays - OAT1 Pedro Borges',
     version: '1.0.0',
     endpoints: {
       'GET /': 'Informações da API',
+      'GET /api-docs': 'Documentação Swagger',
       'GET /items': 'Listar todos os itens',
       'GET /items/:id': 'Buscar item por ID',
       'POST /items': 'Criar novo item',
@@ -58,13 +93,46 @@ app.get('/', (_req, res) => {
       'PATCH /items/:id': 'Atualizar item parcial',
       'DELETE /items/:id': 'Deletar item'
     },
-    totalItems: items.length
+    totalItems: items.length,
+    swaggerDocs: 'http://localhost:3000/api-docs'
   });
 });
 
 // ==================== OPERAÇÕES CRUD ====================
 
-// CREATE - Criar novo item
+/**
+ * @swagger
+ * /items:
+ *   post:
+ *     summary: Criar novo item (CREATE)
+ *     description: Cria um novo item no array de dados
+ *     tags: [Items]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ItemInput'
+ *     responses:
+ *       201:
+ *         description: Item criado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       400:
+ *         description: Dados de entrada inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Erro interno do servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 app.post('/items', (req, res) => {
   try {
     const { name, description, category, price } = req.body;
@@ -102,7 +170,49 @@ app.post('/items', (req, res) => {
   }
 });
 
-// READ - Listar todos os itens
+/**
+ * @swagger
+ * /items:
+ *   get:
+ *     summary: Listar todos os itens (READ)
+ *     description: Retorna uma lista paginada de todos os itens, com opções de filtro
+ *     tags: [Items]
+ *     parameters:
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *         description: Filtrar itens por categoria
+ *         example: "Eletrônicos"
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: Número da página para paginação
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 10
+ *         description: Número de itens por página
+ *     responses:
+ *       200:
+ *         description: Lista de itens retornada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ItemsList'
+ *       500:
+ *         description: Erro interno do servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 app.get('/items', (req, res) => {
   try {
     const { category, page = 1, limit = 10 } = req.query;
@@ -139,7 +249,51 @@ app.get('/items', (req, res) => {
   }
 });
 
-// READ - Buscar item por ID
+/**
+ * @swagger
+ * /items/{id}:
+ *   get:
+ *     summary: Buscar item por ID (READ)
+ *     description: Retorna um item específico baseado no ID fornecido
+ *     tags: [Items]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: ID único do item
+ *         example: 1
+ *     responses:
+ *       200:
+ *         description: Item encontrado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 item:
+ *                   $ref: '#/components/schemas/Item'
+ *       400:
+ *         description: ID inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Item não encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Erro interno do servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 app.get('/items/:id', validateId, (req, res) => {
   try {
     const item = findItemById(req.params.id);
@@ -161,7 +315,54 @@ app.get('/items/:id', validateId, (req, res) => {
   }
 });
 
-// UPDATE - Atualizar item completo (PUT)
+/**
+ * @swagger
+ * /items/{id}:
+ *   put:
+ *     summary: Atualizar item completo (UPDATE)
+ *     description: Atualiza completamente um item existente. Todos os campos são obrigatórios.
+ *     tags: [Items]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: ID único do item
+ *         example: 1
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ItemInput'
+ *     responses:
+ *       200:
+ *         description: Item atualizado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       400:
+ *         description: ID inválido ou dados de entrada inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Item não encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Erro interno do servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 app.put('/items/:id', validateId, (req, res) => {
   try {
     const itemIndex = findItemIndexById(req.params.id);
@@ -205,7 +406,54 @@ app.put('/items/:id', validateId, (req, res) => {
   }
 });
 
-// UPDATE - Atualizar item parcial (PATCH)
+/**
+ * @swagger
+ * /items/{id}:
+ *   patch:
+ *     summary: Atualizar item parcial (UPDATE)
+ *     description: Atualiza parcialmente um item existente. Apenas os campos fornecidos serão atualizados.
+ *     tags: [Items]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: ID único do item
+ *         example: 1
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ItemUpdate'
+ *     responses:
+ *       200:
+ *         description: Item atualizado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       400:
+ *         description: ID inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Item não encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Erro interno do servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 app.patch('/items/:id', validateId, (req, res) => {
   try {
     const itemIndex = findItemIndexById(req.params.id);
@@ -248,7 +496,54 @@ app.patch('/items/:id', validateId, (req, res) => {
   }
 });
 
-// DELETE - Deletar item
+/**
+ * @swagger
+ * /items/{id}:
+ *   delete:
+ *     summary: Deletar item (DELETE)
+ *     description: Remove um item específico do array baseado no ID fornecido
+ *     tags: [Items]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: ID único do item a ser deletado
+ *         example: 1
+ *     responses:
+ *       200:
+ *         description: Item deletado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Item deletado com sucesso"
+ *                 item:
+ *                   $ref: '#/components/schemas/Item'
+ *       400:
+ *         description: ID inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Item não encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Erro interno do servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 app.delete('/items/:id', validateId, (req, res) => {
   try {
     const itemIndex = findItemIndexById(req.params.id);
@@ -274,7 +569,34 @@ app.delete('/items/:id', validateId, (req, res) => {
   }
 });
 
-// Rota para limpar todos os itens (útil para testes)
+/**
+ * @swagger
+ * /items:
+ *   delete:
+ *     summary: Limpar todos os itens (UTILITÁRIO)
+ *     description: Remove todos os itens do array. Útil para testes e desenvolvimento.
+ *     tags: [Utilities]
+ *     responses:
+ *       200:
+ *         description: Todos os itens foram deletados com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Todos os 5 itens foram deletados"
+ *                 totalDeleted:
+ *                   type: integer
+ *                   example: 5
+ *       500:
+ *         description: Erro interno do servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 app.delete('/items', (_req, res) => {
   try {
     const count = items.length;
@@ -297,7 +619,7 @@ app.delete('/items', (_req, res) => {
 app.use('*', (_req, res) => {
   res.status(404).json({
     error: 'Rota não encontrada',
-    message: 'Verifique a documentação em GET /'
+    message: 'Verifique a documentação em GET / ou /api-docs'
   });
 });
 
@@ -305,6 +627,7 @@ app.use('*', (_req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
   console.log(`📖 Acesse http://localhost:${PORT} para ver a documentação`);
+  console.log(`📚 Swagger UI disponível em http://localhost:${PORT}/api-docs`);
 });
 
 module.exports = app;

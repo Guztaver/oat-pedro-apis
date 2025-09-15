@@ -59,6 +59,37 @@ npm start
 - Servidor local: `http://localhost:3000`
 - Documentação: `http://localhost:3000/`
 
+## 🤖 **IMPORTAÇÃO AUTOMÁTICA NO POSTMAN** 
+
+### ✨ **SIM! O Postman pode descobrir automaticamente todas as rotas!**
+
+Existem **3 maneiras** de fazer isso:
+
+#### **🎯 Método 1: Swagger/OpenAPI (MAIS FÁCIL)**
+```
+1. Abra o Postman
+2. Import → Link → Cole: http://localhost:3000/api-docs
+3. ✅ TODAS as rotas importadas automaticamente!
+```
+
+#### **📁 Método 2: Arquivo de Coleção**
+```
+1. Baixe: postman-collection.json
+2. Import → Upload Files
+3. ✅ Collection completa com exemplos!
+```
+
+#### **🔗 Método 3: URL da API**
+```
+1. Cole a URL base no Postman: http://localhost:3000
+2. O Postman detecta automaticamente os endpoints
+3. ✅ Descoberta automática ativada!
+```
+
+**🚀 Resultado:** Todas as operações CRUD estarão disponíveis sem configuração manual!
+
+---
+
 ## 📚 Documentação da API
 
 ### Estrutura do Item
@@ -195,7 +226,33 @@ DELETE /items
 
 ## 🧪 Testando a API
 
-### Usando cURL:
+### 🚀 **IMPORTAÇÃO AUTOMÁTICA NO POSTMAN** (Recomendado)
+
+#### **Opção 1: Swagger/OpenAPI (Mais Fácil)**
+1. Abra o Postman
+2. Clique em **"Import"** (botão no canto superior esquerdo)
+3. Selecione **"Link"** 
+4. Cole: `http://localhost:3000/api-docs`
+5. Clique **"Continue"** → **"Import"**
+6. ✅ **Pronto!** Todas as rotas serão importadas automaticamente com exemplos!
+
+#### **Opção 2: Arquivo de Coleção JSON**
+1. Baixe o arquivo: [`postman-collection.json`](./postman-collection.json)
+2. No Postman: **Import** → **"Upload Files"** → Selecione o arquivo
+3. Importe também: [`postman-environment.json`](./postman-environment.json)
+4. ✅ **Pronto!** Collection completa com testes de erro incluídos!
+
+#### **Opção 3: Descoberta Automática por URL**
+- **Swagger UI:** `http://localhost:3000/api-docs`
+- **OpenAPI JSON:** `http://localhost:3000/api-docs-json` (se configurado)
+
+### 📖 **Documentação Interativa**
+- **Swagger UI:** `http://localhost:3000/api-docs`
+  - Interface visual para testar todos os endpoints
+  - Exemplos de requisições e respostas
+  - Validação automática de esquemas
+
+### 🔧 **Usando cURL (Linha de Comando):**
 
 1. **Criar um item:**
 ```bash
@@ -226,8 +283,17 @@ curl -X PUT http://localhost:3000/items/1 \
 curl -X DELETE http://localhost:3000/items/1
 ```
 
-### Usando Postman, Insomnia ou Thunder Client:
-Importe a collection ou configure manualmente os endpoints acima.
+### 🎯 **Script de Teste Automatizado:**
+```bash
+# Execute o script completo de testes
+./test-api.sh
+```
+
+### 🛠️ **Outras Ferramentas:**
+- **Insomnia:** Importe via OpenAPI URL ou arquivo JSON
+- **Thunder Client (VS Code):** Importe a collection JSON
+- **Bruno:** Suporta importação de OpenAPI
+- **Hoppscotch:** Cole a URL do Swagger para importação automática
 
 ## 🏗️ Estrutura do Projeto
 
